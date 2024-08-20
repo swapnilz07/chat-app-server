@@ -25,10 +25,15 @@ const chatSchema = new mongoose.Schema(
       ref: "User",
     },
     groupChatImage: {
-      // To store the chat or group image if needed
       type: String,
       trim: true,
     },
+    messages: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Message",
+      },
+    ],
   },
   { timestamps: true }
 );

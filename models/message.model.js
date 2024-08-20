@@ -39,7 +39,6 @@ const messageSchema = new mongoose.Schema(
       },
     ],
     reaction: [
-      // To store reactions like emojis
       {
         user: {
           type: mongoose.Schema.Types.ObjectId,
@@ -50,6 +49,14 @@ const messageSchema = new mongoose.Schema(
         },
       },
     ],
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+    },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
