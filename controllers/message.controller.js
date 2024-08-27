@@ -3,17 +3,8 @@ import Message from "../models/message.model.js";
 
 export const sendMessage = async (req, res) => {
   try {
-    const {
-      content,
-      chatId,
-      messageType,
-      mediaUrl,
-      fileName,
-      fileSize,
-      replyTo,
-    } = req.body;
+    const { content, chatId, messageType, mediaUrl } = req.body;
 
-    // Validation
     if (!chatId) {
       return res
         .status(400)
@@ -26,25 +17,17 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    // Default messageType to "text" if not provided
-    const determinedMessageType = messageType || (mediaUrl ? "media" : "text");
-
-    // Create a new message object
-    const newMessage = new Message({
-      sender: req.user._id, // Assuming the user is stored in req.user
+    const messageData = {
+      sender: req.user._id,
       chat: chatId,
-      content: content || "", // Default to an empty string if content is not provided
-      messageType: determinedMessageType, // Use determined message type
-      mediaUrl: mediaUrl || null, // Media URL for images, videos, documents, etc.
-      fileName: fileName || null, // Optional: Name of the file
-      fileSize: fileSize || null, // Optional: Size of the file
-      replyTo: replyTo || null, // For reply functionality
-    });
+      content: content || "",
+      messageType: messageType || (mediaUrl ? "media" : "text"),
+      mediaUrl: mediaUrl || null,
+    };
 
-    // Save the message to the database
+    const newMessage = new Message(messageData);
     const savedMessage = await newMessage.save();
 
-    // Update the latest message in the chat
     const chat = await Chat.findByIdAndUpdate(
       chatId,
       {
@@ -53,12 +36,11 @@ export const sendMessage = async (req, res) => {
       },
       { new: true }
     )
-      .populate("users", "-password") // Populate users for frontend rendering
-      .populate("latestMessage"); // Populate the latest message
+      .populate("users", "-password")
+      .populate("latestMessage");
 
-    // Populate sender information in the saved message
     const fullMessage = await Message.findById(savedMessage._id)
-      .populate("sender", "name profileImg") // Assuming sender's profilePic is needed
+      .populate("sender", "name profileImg")
       .populate("chat");
 
     return res.status(200).json(fullMessage);
@@ -72,19 +54,20 @@ export const allMessages = async (req, res) => {
   try {
     const { chatId } = req.params;
 
-    // Validate chatId
     if (!chatId) {
       return res.status(400).json({ message: "Chat ID is required." });
     }
 
-    // Fetch all messages for the specified chatId
     const messages = await Message.find({ chat: chatId })
-      .populate("sender", "name profilePic email") // Populate sender with name and profile picture
-      .populate("chat")
-      .populate("replyTo") // Optional: Populate replyTo if you want to show the original message
-      .populate("reaction.user", "name profileImg"); // Populate user who reacted
+      .populate("sender", "name profilePic email")
+      .populate({
+        path: "chat",
+        populate: {
+          path: "users",
+          select: "-password",
+        },
+      });
 
-    // Return the messages in the response
     return res.status(200).json(messages);
   } catch (error) {
     console.log(`Error in allMessages: ${error.message}`);

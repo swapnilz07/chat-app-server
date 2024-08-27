@@ -14,7 +14,7 @@ const messageSchema = new mongoose.Schema(
     },
     messageType: {
       type: String,
-      enum: ["text", "image", "video", "audio", "document"],
+      enum: ["text", "image", "video"],
       default: "text",
     },
     content: {
@@ -25,12 +25,9 @@ const messageSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    fileName: {
-      type: String,
-      trim: true,
-    },
-    fileSize: {
-      type: Number,
+    seen: {
+      type: Boolean,
+      default: false,
     },
     readBy: [
       {
@@ -38,25 +35,6 @@ const messageSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    reaction: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-        emoji: {
-          type: String,
-        },
-      },
-    ],
-    replyTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Message",
-    },
-    deleted: {
-      type: Boolean,
-      default: false,
-    },
   },
   { timestamps: true }
 );

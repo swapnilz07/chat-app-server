@@ -7,7 +7,6 @@ export const accessChat = async (req, res) => {
   if (!userId) return res.status(400).json({ message: "User ID is required." });
 
   try {
-    // Check if chat already exists
     let isChat = await Chat.find({
       isGroupChat: false,
       $and: [
@@ -26,7 +25,6 @@ export const accessChat = async (req, res) => {
     if (isChat.length > 0) {
       return res.status(200).json(isChat[0]);
     } else {
-      // Create a new chat if it doesn't exist
       const chatData = {
         chatName: "sender",
         isGroupChat: false,
@@ -50,7 +48,6 @@ export const accessChat = async (req, res) => {
 
 export const fetchChats = async (req, res) => {
   try {
-    // Find chats where the user is part of the chat
     const chats = await Chat.find({ users: req.user._id })
       .populate("users", "-password")
       .populate("groupAdmin", "-password")
@@ -63,7 +60,6 @@ export const fetchChats = async (req, res) => {
       })
       .sort({ updatedAt: -1 });
 
-    // Send the fetched chats as response
     res.status(200).json(chats);
   } catch (error) {
     console.error(`Error in fetchChats: ${error.message}`);
