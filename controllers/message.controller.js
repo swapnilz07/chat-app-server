@@ -60,12 +60,19 @@ export const allMessages = async (req, res) => {
 
     const messages = await Message.find({ chat: chatId })
       .populate("sender", "name profilePic email")
+
       .populate({
         path: "chat",
-        populate: {
-          path: "users",
-          select: "-password",
-        },
+        populate: [
+          {
+            path: "users",
+            select: "-password",
+          },
+          {
+            path: "groupAdmin",
+            select: "name email profileImg",
+          },
+        ],
       });
 
     return res.status(200).json(messages);

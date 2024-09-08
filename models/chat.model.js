@@ -26,7 +26,8 @@ const chatSchema = new mongoose.Schema(
     },
     groupChatImage: {
       type: String,
-      trim: true,
+      default:
+        "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
     },
     messages: [
       {

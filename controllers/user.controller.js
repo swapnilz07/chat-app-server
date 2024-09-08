@@ -29,24 +29,22 @@ export const selectUser = async (req, res) => {
   const { name: searchTerm } = req.query; // Get the searchTerm from the query string
   const { _id: currentUserId } = req.user; // Get currentUserId from the authenticated user object
 
-  // Ensure searchTerm is a valid string
   if (!searchTerm || typeof searchTerm !== "string") {
     return res.status(400).json({ message: "Invalid search term provided." });
   }
 
   try {
-    // Search for users by name or email, excluding the logged-in user
     const users = await User.find({
       $and: [
         {
           $or: [
-            { name: { $regex: searchTerm, $options: "i" } }, // Case-insensitive search by name
-            { email: { $regex: searchTerm, $options: "i" } }, // Case-insensitive search by email
+            { name: { $regex: searchTerm, $options: "i" } },
+            { email: { $regex: searchTerm, $options: "i" } },
           ],
         },
-        { _id: { $ne: currentUserId } }, // Exclude the logged-in user
+        { _id: { $ne: currentUserId } },
       ],
-    }).select("-password"); // Exclude password from the result
+    }).select("-password");
 
     if (users.length === 0) {
       return res
@@ -54,7 +52,6 @@ export const selectUser = async (req, res) => {
         .json({ message: "No users found matching the search criteria." });
     }
 
-    // Return the list of users found
     return res.status(200).json(users);
   } catch (error) {
     console.log("Error in selectUser", error.message);
